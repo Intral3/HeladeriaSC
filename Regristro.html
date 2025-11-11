@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro - Heladería SC</title>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #fff8f8;
+      --text: #000;
+      --accent: #ff8181;
+      --cyan: rgb(22, 220, 255);
+      --line: #eceef2;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+
+    .form-box {
+      background: var(--panel);
+      padding: 40px 36px;
+      border-radius: 14px;
+      border: 2px solid var(--accent);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      width: 360px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-weight: 800;
+      color: var(--accent);
+      font-size: 28px;
+    }
+
+    .field {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      transition: border .2s, box-shadow .2s;
+      font-size: 15px;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 129, 129, .25);
+    }
+
+    .field label {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      font-size: 14px;
+      color: #777;
+      transition: .2s;
+      pointer-events: none;
+    }
+
+    .field input:focus+label,
+    .field input:not(:placeholder-shown)+label {
+      top: -8px;
+      left: 8px;
+      font-size: 12px;
+      background: var(--panel);
+      padding: 0 5px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--cyan);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 800;
+      transition: .2s;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .msg {
+      margin-top: 6px;
+      text-align: center;
+      font-size: 14px;
+      min-height: 18px;
+      color: #c0392b;
+      font-weight: 700;
+    }
+
+    .login-link {
+      margin-top: 16px;
+      text-align: center;
+      display: block;
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .login-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="form-box">
+    <h1>Crear Cuenta</h1>
+
+    <form id="form-registro" autocomplete="off">
+      <div class="field">
+        <input type="text" name="nombre" placeholder=" " required>
+        <label>Nombre completo</label>
+      </div>
+
+      <div class="field">
+        <input type="text" name="direccion" placeholder=" " required>
+        <label>Dirección</label>
+      </div>
+
+      <div class="field">
+        <input type="email" name="correo_electronico" placeholder=" " required>
+        <label>Correo electrónico</label>
+      </div>
+
+      <div class="field">
+        <input type="tel" name="telefono" placeholder=" ">
+        <label>Teléfono</label>
+      </div>
+
+      <div class="field">
+        <input type="password" name="password" placeholder=" " required>
+        <label>Contraseña</label>
+      </div>
+
+      <button class="btn" type="submit" id="btn">Registrar</button>
+      <div id="msg" class="msg"></div>
+    </form>
+
+    <a href="inicio.html" class="login-link">Ya tengo cuenta</a>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const client = supabase.createClient(
+    "https://wdfxnrsshcpllgkynedo.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkZnhucnNzaGNwbGxna3luZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwODEyOTgsImV4cCI6MjA3NzY1NzI5OH0.maiNsWZ52NnMOQjCfZUbh3zwmNv2KgMxHCFP2ulssTo"
+  );
+
+  const form = document.getElementById("form-registro");
+  const msg  = document.getElementById("msg");
+  const btn  = document.getElementById("btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+    msg.style.color = "#c0392b";
+    btn.disabled = true;
+
+    try {
+      const fd = new FormData(form);
+
+
+      const telRaw = (fd.get("telefono") || "").toString();
+      const telNum = telRaw ? Number(telRaw.replace(/\D/g, "")) : null;
+
+      const payload = {
+        Nombre: fd.get("nombre"),
+        Direccion: fd.get("direccion"),
+        Telefono: telNum,
+        correo_electronico: fd.get("correo_electronico"), 
+        Contraseña: fd.get("password")                    
+    
+      };
+
+      const { error } = await client.from("Cliente").insert(payload);
+
+      if (error) {
+        msg.textContent = "❌ " + (error.message || "Error al registrar");
+      } else {
+        msg.style.color = "green";
+        msg.textContent = "✅ Registrado correctamente";
+        form.reset();
+        setTimeout(() => (window.location.href = "inicio.html"), 800); 
+      }
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "❌ Error inesperado. Revisa la consola.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+
+
+</body>
+
+</html>
