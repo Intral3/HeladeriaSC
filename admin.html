@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Heladería SC</title>
+  <style>
+    :root{
+      --bg:#ffffff; --text:#000;
+      --logo:rgb(22,220,255); --logo-2:rgb(232,255,22);
+      --accent:#ff8181; --newsletter-cyan:rgb(22,220,255);
+      --maxw:1200px; --line:#eceef2; --panel:#fff8f8;
+      --muted:#6b7280;
+      --pink:#ffd6d6; --sky:#16dcff; --sky-hover:#11cfe9;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text); background:var(--bg); }
+    .layout{ max-width:var(--maxw); margin:0 auto; padding:18px; display:grid; gap:18px; }
+
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      max-width:1100px; margin:12px auto 0; padding:18px 22px;
+      background:var(--pink); border-radius:20px;
+      display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 6px 18px rgba(255,163,163,.35);
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .badge{
+      width:48px; height:48px; border-radius:50%;
+      display:grid; place-items:center; color:#fff; font-weight:800;
+      background:linear-gradient(135deg, var(--logo), var(--logo-2));
+    }
+    .brand-title{font-size:20px; font-weight:800; color:var(--text)}
+    .actions{display:flex; align-items:center; gap:10px}
+
+    .btn{ background:var(--sky); color:#fff; border:0;
+      padding:10px 16px; border-radius:999px; font-weight:900; cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.06); transition:.15s transform, .15s box-shadow, .15s background;
+    }
+    .btn:hover{ background:var(--sky-hover); transform:translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.10) }
+    .btn.ghost{ background:#fff; color:#111; border:1px solid var(--line); }
+    .btn.alt{ background:var(--accent); color:#fff; }
+
+    /* Chip usuario */
+    .chip{
+      background:#ecf5ff; color:#0b3d66; border:1px solid #d8e9ff;
+      padding:10px 14px; border-radius:999px; font-weight:700;
+    }
+    @media (max-width:680px){
+      .chip{display:none}
+    }
+
+    .card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; }
+    .title{ margin:0 0 12px; color:var(--accent); font-size:22px; }
+    .grid{ display:grid; gap:16px; }
+    .two{ grid-template-columns: 1.3fr 1fr; }
+    .toolbar{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .input, .select, textarea{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:14px; }
+    textarea{ min-height:88px; resize:vertical; }
+    .muted{ color:var(--muted); }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; font-size:14px; vertical-align:top; }
+    th{ font-weight:800; color:#111; }
+    tr:hover td{ background:#fafafa; }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+    .tabs{ display:flex; gap:8px; margin:6px 0 2px; }
+    .tab{ padding:10px 12px; border:1px solid var(--line); border-bottom:none; background:#fff; border-radius:10px 10px 0 0; cursor:pointer; font-weight:700; }
+    .tab.active{ background:var(--panel); color:#111; }
+    .tabpanels{ border:1px solid var(--line); border-radius:0 12px 12px 12px; overflow:hidden; }
+    .panel{ display:none; padding:16px; background:#fff; }
+    .panel.active{ display:block; background:var(--panel); }
+    .ok{ color:green; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="badge">SC</div>
+      <div class="brand-title">Heladería SC — Admin</div>
+    </div>
+    <div class="actions">
+      <span id="who" class="chip">Cargando…</span>
+      <button id="btnInicio" class="btn ghost" type="button">Inicio</button>
+      <button id="btnSalir" class="btn alt" type="button">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="tabs">
+      <button class="tab active" data-tab="productos">Productos</button>
+      <button class="tab" data-tab="clientes">Clientes</button>
+    </div>
+
+    <div class="tabpanels">
+      <!-- Productos -->
+      <section id="panel-productos" class="panel active">
+        <div class="grid two">
+          <!-- Tabla -->
+          <div class="card">
+            <h3 class="title">Listado de productos</h3>
+            <div class="toolbar">
+              <input id="qProd" class="input" placeholder="Buscar por nombre, talla o color…">
+              <button id="btnRefrescar" class="btn ghost">Refrescar</button>
+            </div>
+            <table id="tblProductos">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nombre</th>
+                  <th>Precio</th>
+                  <th>Talla</th>
+                  <th>Color</th>
+                  <th>Stock</th>
+                  <th>Descripción</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <p id="prodInfo" class="muted" style="margin-top:8px;"></p>
+          </div>
+
+          <div class="card">
+            <h3 class="title">Crear / Editar producto</h3>
+            <form id="formProducto" autocomplete="off">
+              <input type="hidden" name="id">
+              <div class="row">
+                <div><label>Nombre</label><input class="input" name="Nombre" required></div>
+                <div><label>Precio</label><input class="input" name="Precio" type="number" step="0.01" min="0" required></div>
+              </div>
+              <div class="row">
+                <div><label>Talla</label><input class="input" name="Talla" placeholder="S, M, L…"></div>
+                <div><label>Color</label><input class="input" name="Color" placeholder="Rojo, Azul…"></div>
+              </div>
+              <div class="row">
+                <div><label>Stock</label><input class="input" name="Stock" type="number" min="0" required></div>
+                <div><label>Descripción</label><input class="input" name="Descripción" placeholder="Breve detalle"></div>
+              </div>
+              <div class="actions" style="justify-content:flex-start">
+                <button type="submit" class="btn">Guardar</button>
+                <button type="button" id="btnLimpiar" class="btn ghost">Limpiar</button>
+                <button type="button" id="btnBorrar" class="btn alt" disabled>Eliminar</button>
+              </div>
+              <p id="prodMsg" class="muted"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-clientes" class="panel">
+        <div class="card">
+          <h3 class="title">Clientes</h3>
+          <div class="toolbar">
+            <input id="qCli" class="input" placeholder="Buscar por nombre o correo…">
+            <button id="btnRefrescarCli" class="btn ghost">Refrescar</button>
+          </div>
+          <table id="tblClientes">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Rol</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <p id="cliInfo" class="muted" style="margin-top:8px;"></p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ✅ Inicializar Supabase (reemplaza con tus claves reales)
+    const sb = supabase.createClient(
+      "https://TU-PROYECTO.supabase.co",
+      "TU-LLAVE-PUBLICA"
+    );
+
+    async function requireAdmin() {
+      const whoEl = document.getElementById("who");
+      const stored = localStorage.getItem("usuario");
+      const rolLS  = (localStorage.getItem("rol") || "").toLowerCase();
+
+      if (!stored || !rolLS) {
+        location.href = "inicio.html";
+        return;
+      }
+
+      const user = JSON.parse(stored);
+      const { data, error } = await sb
+        .from("Usuario")
+        .select("nombre, correo, rol")
+        .eq("correo", user.correo)
+        .single();
+
+      if (error || !data) {
+        alert("Error al verificar usuario o usuario no encontrado");
+        location.href = "inicio.html";
+        return;
+      }
+
+      if (String(data.rol).toLowerCase() !== "admin") {
+        alert("Acceso restringido. Solo administradores.");
+        location.href = "inicio.html";
+        return;
+      }
+
+ 
+      whoEl.textContent = `Admin: ${data.nombre}`;
+      localStorage.setItem("rol", data.rol);
+    }
+
+    requireAdmin();
+  </script>
+</body>
+</html>
