@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heladería SC</title>
+
+  <style>
+    :root{
+      --bg:#ffffff; --text:#000;
+      --logo:rgb(22,220,255); --logo-2:rgb(232,255,22);
+      --accent:#ff8181; --newsletter-bg:#2f2421;
+      --newsletter-cyan:rgb(22,220,255);
+      --newsletter-title:rgb(22,220,255);
+      --newsletter-news:#ff8181;
+      --maxw:1200px; --line:#eceef2; --panel:#fff8f8;
+    }
+    *{ box-sizing:border-box }
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text); background:var(--bg); line-height:1.55; scroll-behavior:smooth;
+    }
+    .layout{
+      max-width:var(--maxw); margin:0 auto; padding:14px 18px; display:grid; gap:18px;
+      grid-template-columns:2fr 1fr;
+      grid-template-areas:"header-area header-area" "main-area sidebar-area" "footer-area footer-area";
+    }
+    header{ grid-area:header-area; background:rgba(255,163,163,.85); border-radius:12px }
+    .navbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px; background:#ffd6d6; border-radius:12px;
+    }
+    .logo{ display:flex; align-items:center; gap:10px; font-weight:800 }
+    .logo-badge{
+      width:38px; height:38px; border-radius:50%; display:grid; place-items:center; color:#fff;
+      background:linear-gradient(135deg,var(--logo),var(--logo-2));
+    }
+    .chip-usuario{ font-weight:800; margin-left:10px }
+
+    .hamburger{
+      display:none; background:#fff; border:1px solid #ccc; border-radius:8px;
+      padding:6px 10px; cursor:pointer; font-size:20px;
+    }
+    .links{ display:flex; gap:10px; align-items:center }
+    .links a, .links button{
+      appearance:none; border:1.5px solid var(--newsletter-cyan);
+      background:#fff; color:#000; font-weight:700; text-decoration:none;
+      padding:8px 12px; border-radius:999px; cursor:pointer;
+      transition:background .2s, color .2s, transform .06s;
+    }
+    .links a:hover, .links a:focus,
+    .links button:hover, .links button:focus{
+      background:var(--newsletter-cyan); color:#fff; outline:none;
+    }
+    .links a:active, .links button:active{ transform:scale(.98) }
+    .boton4{
+      background:var(--newsletter-cyan); color:#fff; padding:8px 14px; border:none;
+      border-radius:999px; cursor:pointer; font-weight:800;
+    }
+    .boton4:hover{ background:#11c7e7; color:#fff }
+
+    main{ grid-area:main-area }
+    .title{ text-align:center; margin:0 0 22px; font-size:clamp(26px,4vw,36px); color:var(--accent); font-weight:800 }
+    .story{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+    .box{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px }
+
+    .galeria{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; display:grid; gap:16px }
+    .galeria-grid{ display:grid; gap:16px; grid-template-columns:repeat(3,1fr) }
+    .card{ background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; display:grid; grid-template-rows:160px auto }
+    .thumb{ width:100%; height:100%; object-fit:cover }
+    .card-body{ padding:12px }
+
+    .btn{ width:100%; padding:12px; border:none; border-radius:8px; background:var(--newsletter-cyan); color:#fff; font-weight:800; cursor:pointer; transition:filter .2s }
+    .btn:hover{ filter:brightness(.95) }
+
+    .sidebar-area{ grid-area:sidebar-area; background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px }
+    .footer-area{ grid-area:footer-area; text-align:center; padding:18px; background:#fafafa; border-radius:12px }
+
+    .flotante{
+      position:fixed; right:18px; bottom:18px; background:#fff; border:2px solid var(--newsletter-cyan);
+      border-radius:14px; padding:10px 14px; box-shadow:0 10px 30px rgba(0,0,0,.15)
+    }
+
+    .modal{ display:none; position:fixed; z-index:999; inset:0; background:rgba(0,0,0,.6); justify-content:center; align-items:center }
+    .modal.show{ display:flex }
+    .modal-content{
+      background:var(--panel); padding:32px; width:340px; border-radius:14px; border:2px solid var(--accent);
+      position:relative; box-shadow:0 8px 25px rgba(0,0,0,.2)
+    }
+    .close{ position:absolute; top:10px; right:14px; cursor:pointer; font-size:20px; color:var(--accent); font-weight:bold }
+    .field{ position:relative; margin-bottom:18px }
+    .field input{
+      width:100%; padding:12px; border-radius:8px; border:1px solid var(--line); font-size:15px; background:#fff
+    }
+    .field input:focus{ border-color:var(--accent); outline:none }
+    .field label{
+      position:absolute; top:12px; left:12px; color:#666; transition:.2s; pointer-events:none
+    }
+    .field input:focus+label, .field input:not(:placeholder-shown)+label{
+      top:-6px; left:8px; font-size:12px; background:var(--panel); padding:0 5px; color:var(--accent); font-weight:600;
+    }
+    .msg{ text-align:center; font-size:14px; min-height:18px; margin-top:6px }
+
+    .btn-mas-sabores{
+      width:max-content; justify-self:center; padding:10px 16px; border-radius:999px;
+      background:#fff; color:#000; border:1.5px solid var(--newsletter-cyan); font-weight:800;
+    }
+    .btn-mas-sabores:hover,.btn-mas-sabores:focus{ background:var(--newsletter-cyan); color:#fff }
+
+    @media (max-width:768px){
+      .layout{ grid-template-columns:1fr; grid-template-areas:"header-area" "main-area" "sidebar-area" "footer-area" }
+      .story{ grid-template-columns:1fr }
+      .galeria-grid{ grid-template-columns:1fr }
+      .hamburger{ display:block }
+      .links{
+        display:none; flex-direction:column; background:#fff; border-radius:8px; margin-top:8px; padding:8px
+      }
+      .links.open{ display:flex }
+      .links a, .links button{ width:100%; text-align:center }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <header class="header-area">
+      <div class="navbar">
+        <div class="logo">
+          <div class="logo-badge">SC</div>
+          <span>Heladería SC</span>
+        </div>
+
+        <button id="botonMenu" class="hamburger" aria-controls="menu" aria-expanded="false">☰</button>
+
+        <nav id="menu" class="links" aria-label="Principal">
+          <a id="btn-login" class="boton4" href="#">Iniciar sesión</a>
+          <a href="massabores.html">Más Sabores</a>
+          
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-area">
+      <section id="historia">
+        <h2 class="title">Honestamente delicioso</h2>
+        <div class="story">
+          <div class="box">
+            <p class="muted">Helados honestos que enamoran. Menos azúcar, más sabor real…</p>
+          </div>
+          <div class="box">
+            <h3>Cómo hacemos el helado</h3>
+            <ul class="muted">
+              <li>Pequeños lotes batidos cada mañana</li>
+              <li>Ingredientes locales seleccionados</li>
+              <li>Recetas cortas y naturales</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="galeria" class="galeria">
+        <h2 class="title">Nuestros Sabores "Fríos"</h2>
+        <p class="muted" style="text-align:center; margin:0 0 8px">Clásicos y de temporada</p>
+
+        <div class="galeria-grid">
+          <article class="card">
+            <img class="thumb" src="maracuyta.jfif" alt="Helado maracuyá">
+            <div class="card-body"><h3>Maracuyá</h3></div>
+          </article>
+          <article class="card">
+            <img class="thumb" src="coco.jfif" alt="Helado coco">
+            <div class="card-body"><h3>Coco</h3></div>
+          </article>
+          <article class="card">
+            <img class="thumb" src="Vainilla.jfif" alt="Helado vainilla">
+            <div class="card-body"><h3>Vainilla</h3></div>
+          </article>
+        </div>
+
+        <a class="btn-mas-sabores" href="massabores.html">Ver más sabores</a>
+      </section>
+
+      <section id="contacto" style="margin-top:16px;">
+        <div class="wrap" style="background:var(--newsletter-bg); color:#fff; padding:32px; border-radius:12px;">
+          <h3 class="title" style="color:var(--newsletter-title); margin-top:0;">
+            SUSCRÍBETE A <span style="color:var(--newsletter-news)">NOSOTROS</span>
+          </h3>
+          <button class="btn" type="button" onclick="location.href='Regristro.html'">Regístrate</button>
+        </div>
+      </section>
+
+      <div style="display:grid; place-items:center;"></div>
+      <div class="flotante" role="complementary">🍦 ¿Antojo?</div>
+    </main>
+
+    <aside class="sidebar-area">
+      <h3 style="color:var(--accent); margin:0 0 6px;">Ofertas</h3>
+      <ul>
+        <li>2x1 Miércoles</li>
+        <li>Nuevos sabores</li>
+        <li>Tienda en línea</li>
+      </ul>
+    </aside>
+
+    <footer class="footer-area">© SC — Helado Artesanal. Santiago Calderón</footer>
+  </div>
+
+  <div id="modal-login" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <span id="close-login" class="close" aria-label="Cerrar">✖</span>
+      <h2 id="loginTitle" style="margin-top:0; color:var(--accent); text-align:center;">Iniciar sesión</h2>
+
+      <form id="form-login" autocomplete="off">
+        <div class="field">
+          <input type="email" name="correo" placeholder=" " required>
+          <label>Correo electrónico</label>
+        </div>
+        <div class="field">
+          <input type="password" name="password" placeholder=" " required>
+          <label>Contraseña</label>
+        </div>
+        <button type="submit" class="btn">Ingresar</button>
+        <p id="msg-login" class="msg"></p>
+      </form>
+
+      <button class="btn" type="button" onclick="window.location.href='Registro.html'">Regístrate</button>
+    </div>
+  </div>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ✅ Conexión a Supabase
+  const sb = supabase.createClient(
+    "https://rdckogwsfsrgdtlmncws.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkY2tvZ3dzZnNyZ2R0bG1uY3dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyODYzMTAsImV4cCI6MjA3Nzg2MjMxMH0.y7iI_7klU-d6CAl55TSH2ftNhdbdeoILJmKHTRLTl_8"
+  );
+
+  const btn = document.getElementById('botonMenu');
+  const menu = document.getElementById('menu');
+  btn.addEventListener('click', () => {
+    menu.classList.toggle('open');
+    btn.textContent = menu.classList.contains('open') ? '✖' : '☰';
+    btn.setAttribute('aria-expanded', menu.classList.contains('open') ? 'true' : 'false');
+  });
+
+  const modal     = document.getElementById('modal-login');
+  const closeBtn  = document.getElementById('close-login');
+  const loginLink = document.getElementById('btn-login'); 
+
+  function openLogin(){ modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); }
+  function closeLogin(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+
+  if (loginLink) loginLink.addEventListener('click', (e)=>{ e.preventDefault(); openLogin(); });
+  closeBtn.addEventListener('click', closeLogin);
+  window.addEventListener('click', (e)=>{ if (e.target === modal) closeLogin(); });
+
+  function upsertAdminButton(menuEl){
+    let adminBtn = document.getElementById('btn-admin');
+    if (!adminBtn){
+      adminBtn = document.createElement('a');
+      adminBtn.id = 'btn-admin';
+      adminBtn.href = 'admin.html';
+      adminBtn.textContent = 'Panel Admin';
+      adminBtn.className = 'boton4';
+      adminBtn.style.fontWeight = '800';
+    }
+    const anchorRef = menuEl.querySelector('a[href="massabores.html"]') || menuEl.querySelector('a');
+    if (anchorRef && adminBtn.parentElement !== menuEl) anchorRef.after(adminBtn);
+    else if (!adminBtn.parentElement) menuEl.appendChild(adminBtn);
+  }
+  function removeAdminButton(){
+    const adminBtn = document.getElementById('btn-admin');
+    if (adminBtn) adminBtn.remove();
+  }
+
+  function renderUserHeader(){
+    const menuEl   = document.getElementById('menu');      
+    const logoEl   = document.querySelector('.logo');      
+    const loginBtn = document.getElementById('btn-login');
+    const stored   = localStorage.getItem('usuario');
+    const rolLS    = (localStorage.getItem('rol') || '').toLowerCase();
+
+    if (!stored){
+      removeAdminButton();
+      if (!loginBtn){
+        const a = document.createElement('a');
+        a.id = 'btn-login'; a.className = 'boton4'; a.href = '#'; a.textContent = 'Iniciar sesión';
+        a.addEventListener('click', (e)=>{ e.preventDefault(); openLogin(); });
+        menuEl.prepend(a);
+      }
+      const oldLogout = document.getElementById('btn-logout'); if (oldLogout) oldLogout.remove();
+      const oldName   = document.getElementById('usuarioNombre'); if (oldName) oldName.remove();
+      return;
+    }
+
+    const user = JSON.parse(stored);
+    if (loginBtn) loginBtn.remove();
+
+    let saludo = document.getElementById('usuarioNombre');
+    if (!saludo){
+      saludo = document.createElement('span');
+      saludo.id = 'usuarioNombre';
+      saludo.className = 'chip-usuario';
+      logoEl.appendChild(saludo); 
+    }
+    saludo.textContent = user?.nombre ? user.nombre : 'Usuario';
+
+    let logout = document.getElementById('btn-logout');
+    if (!logout){
+      logout = document.createElement('button');
+      logout.id = 'btn-logout';
+      logout.type = 'button';
+      logout.textContent = 'Cerrar sesión';
+      logout.addEventListener('click', ()=>{
+        localStorage.removeItem('usuario');
+        localStorage.removeItem('rol');
+        removeAdminButton();
+        location.href = 'inicio.html';
+      });
+      menuEl.appendChild(logout);
+    }
+
+    const rolUser = String(user.rol || '').toLowerCase();
+    const isAdmin = rolUser === 'admin' || rolLS === 'admin';
+    if (isAdmin) upsertAdminButton(menuEl); else removeAdminButton();
+  }
+
+  document.addEventListener('DOMContentLoaded', renderUserHeader);
+
+  // ✅ LOGIN
+  document.getElementById("form-login").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const email = e.target.correo.value.trim();
+    const password = e.target.password.value;
+    const msg = document.getElementById("msg-login");
+
+    const { data, error } = await sb
+      .from("Usuario")
+      .select("nombre, rol, correo")
+      .eq("correo", email)
+      .eq("contraseña", password)
+      .maybeSingle();
+
+    if (!data || error){
+      msg.textContent = "❌ Usuario o contraseña incorrectos";
+      msg.style.color = "red";
+      return;
+    }
+
+    localStorage.setItem("usuario", JSON.stringify(data));
+    localStorage.setItem("rol", String(data.rol || "").toLowerCase());
+
+    msg.textContent = "✅ Bienvenido " + data.nombre;
+    msg.style.color = "green";
+
+    setTimeout(()=>{
+      const rolNorm = String(data.rol || "").toLowerCase();
+      if (rolNorm === "admin") location.href = "admin.html";
+      else location.href = "inicio.html";
+    }, 800);
+  });
+</script>
+
+</body>
+</html>
